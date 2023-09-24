@@ -12,6 +12,10 @@ Then server shows the live camera.
   source venv/bin/activate # on linux and mac
   Scripts/bin/activate # on fu***g windows -_-
   ```
+- install dependencies
+  ```bash
+  pip install -r requirements.txt
+  ```
 - Make a selfie
 - move the image to the root project (near the client and server files)
 - update a code below (or add another, if you have several bitches)
@@ -27,6 +31,7 @@ known_face_names = [
     "rado"
 ]
 ```
+- Update the hosts and ports if you need
 - Run server and client on separate terminals
 
 ## I hope you've got it -_- (if you don't, it's your problem)
