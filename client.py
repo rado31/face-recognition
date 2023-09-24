@@ -16,7 +16,7 @@ known_face_encodings = [
     rado_face_encoding,
 ]
 known_face_names = [
-    "Rahymov Dovran"
+    "rado"
 ]
 
 face_locations = []
