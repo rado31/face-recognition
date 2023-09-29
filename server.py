@@ -16,11 +16,10 @@ def connect(sid, environ):
 
 @sio.event
 def server(sid, frame):
-    if frame:
-        data = pickle.loads(frame)
-        data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+    data = pickle.loads(frame)
+    data = cv2.imdecode(data, cv2.IMREAD_COLOR)
 
-        cv2.imshow('Video', data)
+    cv2.imshow('Video', data)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
         sio.emit('stop')
