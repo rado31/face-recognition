@@ -1,20 +1,36 @@
+import eventlet
+import socketio
 import cv2
-import socket
 import pickle
+from sys import exit
 
 
-s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-s.bind(('127.0.0.1', 8000))
+sio = socketio.Server()
+app = socketio.WSGIApp(sio)
 
-while True:
-    x = s.recvfrom(1000000)
-    data = x[0]
-    data = pickle.loads(data)
-    data = cv2.imdecode(data, cv2.IMREAD_COLOR)
 
-    cv2.imshow('Video', data)
+@sio.event
+def connect(sid, environ):
+    print('connect ', sid)
+
+
+@sio.event
+def server(sid, frame):
+    if frame:
+        data = pickle.loads(frame)
+        data = cv2.imdecode(data, cv2.IMREAD_COLOR)
+
+        cv2.imshow('Video', data)
 
     if cv2.waitKey(1) & 0xFF == ord('q'):
-        break
+        sio.emit('stop')
+        exit(0)
 
-cv2.destroyAllWindows()
+
+@sio.event
+def disconnect(sid):
+    print('disconnect ', sid)
+
+
+if __name__ == '__main__':
+    eventlet.wsgi.server(eventlet.listen(('', 8000)), app)

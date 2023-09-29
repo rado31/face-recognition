@@ -1,13 +1,23 @@
 import face_recognition
 import cv2
 import numpy as np
-import socket
 import pickle
+import socketio
 
-s = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
-s.setsockopt(socket.SOL_SOCKET, socket.SO_SNDBUF, 1000000)
+
+sio = socketio.Client()
+sio.connect('http://127.0.0.1:8000')
+
+is_running = True
 
 video_capture = cv2.VideoCapture(0)
+
+
+@sio.event
+def stop():
+    global is_running
+    is_running = False
+
 
 rado_image = face_recognition.load_image_file("rado.jpg")
 rado_face_encoding = face_recognition.face_encodings(rado_image)[0]
@@ -24,7 +34,7 @@ face_encodings = []
 face_names = []
 process_this_frame = True
 
-while True:
+while is_running:
     ret, frame = video_capture.read()
 
     if process_this_frame:
@@ -64,11 +74,9 @@ while True:
         cv2.putText(frame, name, (left + 6, bottom - 6),
                     font, 1.0, (255, 255, 255), 1)
 
-    # cv2.imshow('Video', frame)
-
     ret, buffer = cv2.imencode(
         ".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 30])
     x_as_bytes = pickle.dumps(buffer)
-    s.sendto((x_as_bytes), ('127.0.0.1', 8000))
+    sio.emit('server', x_as_bytes)
 
 video_capture.release()
