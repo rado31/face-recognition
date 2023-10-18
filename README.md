@@ -10,7 +10,7 @@ Then server shows the live camera.
 - activate venv
   ```bash
   source venv/bin/activate # on linux and mac
-  Scripts/bin/activate # on fu***g windows -_-
+  .\venv\Scripts\activate # on fu***g windows -_-
   ```
 - install dependencies
   ```bash
