@@ -4,35 +4,48 @@ import numpy as np
 import pickle
 import socketio
 import requests
+from flask import Flask, Response
+from flask_cors import CORS
+from threading import Thread
+from config.conf import env
 
+
+send = True
+ids = []
 
 sio = socketio.Client()
 sio.connect("http://127.0.0.1:8000")
 
-is_running = True
+app = Flask(__name__)
+CORS(app)
+
+
+@app.route("/clear")
+def clear():
+    global ids
+    ids.clear()
+
+    return ""
+
+
+flask_thread = Thread(target=app.run, args=(env.host, env.port))
+flask_thread.start()
 
 video_capture = cv2.VideoCapture(0)
 
-
-@sio.event
-def stop():
-    global is_running
-    is_running = False
-
-
-rado_image = face_recognition.load_image_file("rado.jpg")
+rado_image = face_recognition.load_image_file("images/rado.jpg")
 rado_face_encoding = face_recognition.face_encodings(rado_image)[0]
 
-aygul_image = face_recognition.load_image_file("Aygul.jpeg")
+aygul_image = face_recognition.load_image_file("images/Aygul.jpeg")
 aygul_face_encoding = face_recognition.face_encodings(aygul_image)[0]
 
-bahar_image = face_recognition.load_image_file("Bahargul.jpeg")
+bahar_image = face_recognition.load_image_file("images/Bahargul.jpeg")
 bahar_face_encoding = face_recognition.face_encodings(bahar_image)[0]
 
-meylis_image = face_recognition.load_image_file("Meylis.jpeg")
+meylis_image = face_recognition.load_image_file("images/Meylis.jpeg")
 meylis_face_encoding = face_recognition.face_encodings(meylis_image)[0]
 
-gunca_image = face_recognition.load_image_file("Guncha.jpeg")
+gunca_image = face_recognition.load_image_file("images/Guncha.jpeg")
 gunca_face_encoding = face_recognition.face_encodings(gunca_image)[0]
 
 known_face_encodings = [
@@ -42,6 +55,7 @@ known_face_encodings = [
     meylis_face_encoding,
     gunca_face_encoding,
 ]
+
 known_face_names = [
     "rado",
     "Aygul Halmyradowa",
@@ -54,9 +68,8 @@ face_locations = []
 face_encodings = []
 face_names = []
 process_this_frame = True
-ids = []
 
-while is_running:
+while True:
     ret, frame = video_capture.read()
 
     if process_this_frame:
@@ -111,8 +124,9 @@ while is_running:
         font = cv2.FONT_HERSHEY_DUPLEX
         cv2.putText(frame, name, (left + 6, bottom - 6), font, 1.0, (255, 255, 255), 1)
 
-    ret, buffer = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 30])
-    x_as_bytes = pickle.dumps(buffer)
-    sio.emit("server", x_as_bytes)
+    if send:
+        ret, buffer = cv2.imencode(".jpg", frame, [int(cv2.IMWRITE_JPEG_QUALITY), 30])
+        x_as_bytes = pickle.dumps(buffer)
+        sio.emit("server", x_as_bytes)
 
 video_capture.release()

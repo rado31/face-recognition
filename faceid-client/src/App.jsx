@@ -10,11 +10,15 @@ export default function App() {
     const [rerender, setRerender] = useState(false)
 
     useEffect(() => {
-        sio.on('connect', () => console.log('connected to server'))
+        sio.on('connect', () => {
+            console.log('connected to server')
+            sio.emit('asd')
+        })
 
         sio.on('student', student => {
             localStorage.setItem(student.id, JSON.stringify(student))
             setRerender(!rerender)
+            location.reload()
         })
 
         return () => {
@@ -39,7 +43,9 @@ export default function App() {
             <Route path='/' element={<Layout />}>
                 <Route
                     path=''
-                    element={<List students={students} setStudents={setStudents} />}
+                    element={
+                        <List students={students} setStudents={setStudents} />
+                    }
                 />
             </Route>
         </Routes>

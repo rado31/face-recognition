@@ -1,6 +1,7 @@
 import { CloseOutlined } from '@ant-design/icons'
 import { Card, Col, FloatButton, Image, Row } from 'antd'
 import React from 'react'
+import { io } from 'socket.io-client'
 
 export default function List({ students, setStudents }) {
     return (
@@ -25,9 +26,11 @@ export default function List({ students, setStudents }) {
 
             <FloatButton
                 icon={<CloseOutlined />}
-                onClick={() => {
+                onClick={async () => {
                     localStorage.clear()
                     setStudents([])
+
+                    await fetch('http://localhost:5000/clear')
                 }}
             />
         </>
